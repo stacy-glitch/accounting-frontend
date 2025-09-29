@@ -1,5 +1,20 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
+import {
+  getCustomersMaster,
+  replaceCustomersMaster,
+  getVehiclesMaster,
+  replaceVehiclesMaster,
+  getEmployeesMaster,
+  replaceEmployeesMaster,
+  getAccountMappingsMaster,
+  replaceAccountMappingsMaster,
+  CustomerRecord as CustomerApiRecord,
+  VehicleRecord as VehicleApiRecord,
+  EmployeeRecord as EmployeeApiRecord,
+  AccountMappingRecord as AccountApiRecord,
+} from '../api';
+
 export interface CustomerRecord {
   code: string;
   name: string;
@@ -39,8 +54,6 @@ interface MasterDataState {
   importEmployees: (file: File) => Promise<void>;
   importAccounts: (file: File) => Promise<void>;
 }
-
-const STORAGE_KEY = 'masterData';
 
 const MasterDataContext = createContext<MasterDataState | undefined>(undefined);
 
@@ -82,39 +95,42 @@ export const MasterDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [accounts, setAccounts] = useState<AccountRecord[]>([]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (parsed.customers) setCustomers(parsed.customers);
-      if (parsed.vehicles) setVehicles(parsed.vehicles);
-      if (parsed.employees) setEmployees(parsed.employees);
-      if (parsed.accounts) setAccounts(parsed.accounts);
-    } catch (error) {
-      console.warn('Failed to restore master data from storage', error);
-    }
+    (async () => {
+      try {
+        const [customerRes, vehicleRes, employeeRes, accountRes] = await Promise.all([
+          getCustomersMaster(),
+          getVehiclesMaster(),
+          getEmployeesMaster(),
+          getAccountMappingsMaster(),
+        ]);
+        setCustomers(customerRes.data.map(mapCustomerFromApi));
+        setVehicles(vehicleRes.data.map(mapVehicleFromApi));
+        setEmployees(employeeRes.data.map(mapEmployeeFromApi));
+        setAccounts(accountRes.data.map(mapAccountFromApi));
+      } catch (error) {
+        console.warn('Failed to fetch master data', error);
+      }
+    })();
   }, []);
-
-  useEffect(() => {
-    const payload = { customers, vehicles, employees, accounts };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [customers, vehicles, employees, accounts]);
 
   const importCustomers = async (file: File) => {
     const text = await readFileAsText(file);
     const { headers, rows } = parseCsv(text);
-    const expected = ['code', 'name', 'taxId', 'contact', 'phone'];
-    if (!ensureHeaders(headers, expected)) {
-      throw new Error('客戶代號表格式錯誤，請確認欄位：code,name,taxId,contact,phone');
+    const baseHeaders = ['code', 'name', 'contact', 'phone'];
+    const hasTaxId = headers.includes('tax_id') || headers.includes('taxId');
+    if (!baseHeaders.every((key) => headers.includes(key)) || !hasTaxId) {
+      throw new Error('客戶代號表格式錯誤，請確認欄位：code,name,tax_id,contact,phone');
     }
-    const mapped: CustomerRecord[] = rows.map((row) => ({
+    const mapped = rows.map((row) => ({
       code: row.code ?? '',
       name: row.name ?? '',
-      taxId: row.taxId ?? '',
+      taxId: row.tax_id ?? row.taxId ?? '',
       contact: row.contact ?? '',
       phone: row.phone ?? '',
     }));
-    setCustomers(mapped);
+    const payload: CustomerApiRecord[] = mapped.map(mapCustomerToApi);
+    const response = await replaceCustomersMaster(payload);
+    setCustomers(response.data.map(mapCustomerFromApi));
   };
 
   const importVehicles = async (file: File) => {
@@ -124,7 +140,7 @@ export const MasterDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!ensureHeaders(headers, expected)) {
       throw new Error('車輛代號表格式錯誤，請確認欄位：code,plate,model,brand,driver,license,permit');
     }
-    const mapped: VehicleRecord[] = rows.map((row) => ({
+    const mapped = rows.map((row) => ({
       code: row.code ?? '',
       plate: row.plate ?? '',
       model: row.model ?? '',
@@ -133,7 +149,8 @@ export const MasterDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       license: row.license ?? '',
       permit: row.permit ?? '',
     }));
-    setVehicles(mapped);
+    const response = await replaceVehiclesMaster(mapped);
+    setVehicles(response.data.map(mapVehicleFromApi));
   };
 
   const importEmployees = async (file: File) => {
@@ -143,12 +160,13 @@ export const MasterDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!ensureHeaders(headers, expected)) {
       throw new Error('員工代號表格式錯誤，請確認欄位：code,name,phone');
     }
-    const mapped: EmployeeRecord[] = rows.map((row) => ({
+    const mapped = rows.map((row) => ({
       code: row.code ?? '',
       name: row.name ?? '',
       phone: row.phone ?? '',
     }));
-    setEmployees(mapped);
+    const response = await replaceEmployeesMaster(mapped);
+    setEmployees(response.data.map(mapEmployeeFromApi));
   };
 
   const importAccounts = async (file: File) => {
@@ -158,11 +176,12 @@ export const MasterDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     if (!ensureHeaders(headers, expected)) {
       throw new Error('會計科目表格式錯誤，請確認欄位：mapping,name');
     }
-    const mapped: AccountRecord[] = rows.map((row) => ({
+    const mapped = rows.map((row) => ({
       mapping: row.mapping ?? '',
       name: row.name ?? '',
     }));
-    setAccounts(mapped);
+    const response = await replaceAccountMappingsMaster(mapped);
+    setAccounts(response.data.map(mapAccountFromApi));
   };
 
   const value = useMemo(
@@ -189,3 +208,40 @@ export const useMasterData = () => {
   }
   return ctx;
 };
+
+const mapCustomerFromApi = (item: CustomerApiRecord): CustomerRecord => ({
+  code: item.code,
+  name: item.name,
+  taxId: item.tax_id,
+  contact: item.contact,
+  phone: item.phone,
+});
+
+const mapCustomerToApi = (item: CustomerRecord): CustomerApiRecord => ({
+  code: item.code,
+  name: item.name,
+  tax_id: item.taxId,
+  contact: item.contact,
+  phone: item.phone,
+});
+
+const mapVehicleFromApi = (item: VehicleApiRecord): VehicleRecord => ({
+  code: item.code,
+  plate: item.plate,
+  model: item.model,
+  brand: item.brand,
+  driver: item.driver,
+  license: item.license,
+  permit: item.permit,
+});
+
+const mapEmployeeFromApi = (item: EmployeeApiRecord): EmployeeRecord => ({
+  code: item.code,
+  name: item.name,
+  phone: item.phone,
+});
+
+const mapAccountFromApi = (item: AccountApiRecord): AccountRecord => ({
+  mapping: item.mapping,
+  name: item.name,
+});

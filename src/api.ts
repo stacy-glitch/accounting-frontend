@@ -39,6 +39,35 @@ export interface TrialBalanceEntry {
     total_credit: number;
 }
 
+export interface CustomerRecord {
+  code: string;
+  name: string;
+  tax_id: string;
+  contact: string;
+  phone: string;
+}
+
+export interface VehicleRecord {
+  code: string;
+  plate: string;
+  model: string;
+  brand: string;
+  driver: string;
+  license: string;
+  permit: string;
+}
+
+export interface EmployeeRecord {
+  code: string;
+  name: string;
+  phone: string;
+}
+
+export interface AccountMappingRecord {
+  mapping: string;
+  name: string;
+}
+
 
 // --- API Functions ---
 
@@ -52,3 +81,16 @@ export const createJournalEntry = (data: JournalEntryPayload) => apiClient.post<
 
 // Reports
 export const getTrialBalance = () => apiClient.get<TrialBalanceEntry[]>('/reports/trial-balance/');
+
+// Master Data
+export const getCustomersMaster = () => apiClient.get<CustomerRecord[]>('/master/customers/');
+export const replaceCustomersMaster = (data: CustomerRecord[]) => apiClient.post<CustomerRecord[]>('/master/customers/import', data);
+
+export const getVehiclesMaster = () => apiClient.get<VehicleRecord[]>('/master/vehicles/');
+export const replaceVehiclesMaster = (data: VehicleRecord[]) => apiClient.post<VehicleRecord[]>('/master/vehicles/import', data);
+
+export const getEmployeesMaster = () => apiClient.get<EmployeeRecord[]>('/master/employees/');
+export const replaceEmployeesMaster = (data: EmployeeRecord[]) => apiClient.post<EmployeeRecord[]>('/master/employees/import', data);
+
+export const getAccountMappingsMaster = () => apiClient.get<AccountMappingRecord[]>('/master/accounts/');
+export const replaceAccountMappingsMaster = (data: AccountMappingRecord[]) => apiClient.post<AccountMappingRecord[]>('/master/accounts/import', data);
