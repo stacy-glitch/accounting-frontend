@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { MODULES } from './modules';
 import CashCreate from './cash/CashCreate';
+import { MaintenanceLayout, CustomerTable, VehicleTable, EmployeeTable, AccountTable } from './maintenance';
 
 interface FormPanelProps {
   moduleKey: string;
@@ -10,11 +11,23 @@ interface FormPanelProps {
   moduleTitle: string;
   formTitle: string;
   modulePath: string;
+  onMaintenanceTabChange: (key: string) => void;
 }
 
-const FormPanel: React.FC<FormPanelProps> = ({ moduleKey, formKey, moduleTitle, formTitle, modulePath }) => {
+const FormPanel: React.FC<FormPanelProps> = ({ moduleKey, formKey, moduleTitle, formTitle, modulePath, onMaintenanceTabChange }) => {
   if (moduleKey === 'cash' && formKey === 'cash-create') {
     return <CashCreate />;
+  }
+
+  if (moduleKey === 'data-maintenance') {
+    return (
+      <MaintenanceLayout activeTab={formKey} onTabChange={onMaintenanceTabChange}>
+        {formKey === 'master-customer' && <CustomerTable />}
+        {formKey === 'master-vehicle' && <VehicleTable />}
+        {formKey === 'master-employee' && <EmployeeTable />}
+        {formKey === 'master-account' && <AccountTable />}
+      </MaintenanceLayout>
+    );
   }
 
   return (
@@ -52,6 +65,32 @@ const Home = () => {
     const firstForm = openModule.forms[0];
     setSelectedFormKey(firstForm.key);
   }, [openModuleKey, openModule?.forms]);
+
+  const renderedContent = openModule ? (
+    <>
+      <header className="content__header">
+        <h1>{openModule.title}</h1>
+        {selectedForm ? <p>{selectedForm.title}</p> : null}
+      </header>
+
+      <section className="content__panel">
+        {selectedForm ? (
+          <FormPanel
+            moduleKey={openModule.key}
+            formKey={selectedForm.key}
+            moduleTitle={openModule.title}
+            formTitle={selectedForm.title}
+            modulePath={openModule.path}
+            onMaintenanceTabChange={setSelectedFormKey}
+          />
+        ) : (
+          <div className="panel-placeholder">
+            <p className="panel-placeholder__hint">尚未選擇表單。</p>
+          </div>
+        )}
+      </section>
+    </>
+  ) : null;
 
   return (
     <section className="home-shell">
@@ -102,32 +141,7 @@ const Home = () => {
         </ul>
       </aside>
 
-      <div className="content">
-        {openModule ? (
-          <>
-            <header className="content__header">
-              <h1>{openModule.title}</h1>
-              {selectedForm ? <p>{selectedForm.title}</p> : null}
-            </header>
-
-            <section className="content__panel">
-              {selectedForm ? (
-                <FormPanel
-                  moduleKey={openModule.key}
-                  formKey={selectedForm.key}
-                  moduleTitle={openModule.title}
-                  formTitle={selectedForm.title}
-                  modulePath={openModule.path}
-                />
-              ) : (
-                <div className="panel-placeholder">
-                  <p className="panel-placeholder__hint">尚未選擇表單。</p>
-                </div>
-              )}
-            </section>
-          </>
-        ) : null}
-      </div>
+      <div className="content">{renderedContent}</div>
     </section>
   );
 };

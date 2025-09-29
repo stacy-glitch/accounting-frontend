@@ -386,3 +386,131 @@ body {
 .cash-create__submit:focus-visible {
   background: #177d4a;
 }
+
+.maintenance {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.maintenance__hero {
+  text-align: center;
+}
+
+.maintenance__title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.maintenance__subtitle {
+  margin: 0.3rem 0 0;
+  color: #5b687f;
+}
+
+.maintenance__tabs {
+  display: inline-flex;
+  gap: 0.6rem;
+  justify-self: center;
+}
+
+.maintenance__tab {
+  padding: 0.55rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid #d8dee7;
+  background: #ffffff;
+  cursor: pointer;
+  font: inherit;
+  color: #1f2a44;
+}
+
+.maintenance__tab.is-active {
+  background: #3f78f2;
+  color: #ffffff;
+  border-color: #3f78f2;
+}
+
+.maintenance__content {
+  background: #ffffff;
+  border: 1px solid #d8dee7;
+  border-radius: 20px;
+  padding: 1.8rem;
+  box-shadow: 0 12px 30px rgba(31, 42, 68, 0.08);
+}
+
+.maintenance-table {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.maintenance-table__header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.maintenance-table__header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.maintenance-table__header p {
+  margin: 0.25rem 0 0;
+  color: #5b687f;
+  font-size: 0.95rem;
+}
+
+.maintenance-table__actions {
+  display: inline-flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.maintenance-table__button {
+  border: none;
+  border-radius: 10px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  background: #e4e9f2;
+  color: #1f2a44;
+}
+
+.maintenance-table__button--primary {
+  background: #1a8d54;
+  color: #f3f7f4;
+}
+
+.maintenance-table__button--danger {
+  background: #cb3d3d;
+  color: #ffffff;
+}
+
+.maintenance-table__button--upload {
+  background: #f6a300;
+  color: #1f2a44;
+}
+
+.maintenance-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.maintenance-table__table th,
+.maintenance-table__table td {
+  border: 1px solid #d8dee7;
+  padding: 0.75rem 0.9rem;
+}
+
+.maintenance-table__table th {
+  background: #f5f7fa;
+  font-weight: 600;
+}
+
+.maintenance-table__empty {
+  text-align: center;
+  color: #7a879a;
+  padding: 1.6rem 0;
+}

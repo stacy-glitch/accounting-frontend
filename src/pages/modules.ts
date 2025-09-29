@@ -106,7 +106,8 @@ export const MODULES: ModuleDefinition[] = [
     forms: [
       { key: 'master-customer', title: '客戶資料維護' },
       { key: 'master-vehicle', title: '車輛資料維護' },
-      { key: 'master-user', title: '使用者權限設定' },
+      { key: 'master-employee', title: '員工資料維護' },
+      { key: 'master-account', title: '會計科目維護' },
     ],
     component: DataMaintenance,
   },
