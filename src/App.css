@@ -232,6 +232,18 @@ body {
   background: rgba(74, 144, 226, 0.12);
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 860px) {
   .sidebar {
     flex: 1 1 100%;
@@ -490,6 +502,21 @@ body {
 .maintenance-table__button--upload {
   background: #f6a300;
   color: #1f2a44;
+}
+
+.maintenance-table__linkButton {
+  border: none;
+  background: none;
+  color: #3f78f2;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0;
+}
+
+.maintenance-table__error {
+  margin: 0;
+  color: #cb3d3d;
+  font-size: 0.9rem;
 }
 
 .maintenance-table__table {

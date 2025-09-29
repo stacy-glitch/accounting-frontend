@@ -1,6 +1,10 @@
 import React from 'react';
 
+import { useMasterData } from '../../context/MasterDataContext';
+
 const CashCreate = () => {
+  const { customers, accounts } = useMasterData();
+
   return (
     <div className="cash-create">
       <header className="cash-create__header">
@@ -28,12 +32,22 @@ const CashCreate = () => {
 
             <div className="cash-create__field">
               <label htmlFor="cash-code">代號</label>
-              <input id="cash-code" className="cash-create__input" placeholder="請輸入代號" />
+              <input
+                id="cash-code"
+                className="cash-create__input"
+                placeholder="請輸入代號"
+                list="customer-codes"
+              />
             </div>
 
             <div className="cash-create__field">
               <label htmlFor="cash-account">會計科目</label>
-              <input id="cash-account" className="cash-create__input" placeholder="請輸入或選擇會計科目" />
+              <input
+                id="cash-account"
+                className="cash-create__input"
+                placeholder="請輸入或選擇會計科目"
+                list="account-names"
+              />
             </div>
 
             <div className="cash-create__field">
@@ -83,6 +97,22 @@ const CashCreate = () => {
           </div>
         </form>
       </section>
+
+      <datalist id="customer-codes">
+        {customers.map((customer) => (
+          <option key={customer.code} value={customer.code}>
+            {customer.name}
+          </option>
+        ))}
+      </datalist>
+
+      <datalist id="account-names">
+        {accounts.map((account) => (
+          <option key={`${account.mapping}-${account.name}`} value={account.name}>
+            {account.mapping}
+          </option>
+        ))}
+      </datalist>
     </div>
   );
 };
