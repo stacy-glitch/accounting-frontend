@@ -12,9 +12,6 @@ const CustomerTable = () => {
           <button type="button" className="maintenance-table__button maintenance-table__button--primary">
             ＋ 新增客戶
           </button>
-          <button type="button" className="maintenance-table__button maintenance-table__button--danger">
-            清除所有資料
-          </button>
           <button type="button" className="maintenance-table__button maintenance-table__button--upload">
             📁 上傳代號表
           </button>
